@@ -48,7 +48,7 @@ def junken_train_operation2():
     clf.result = svm.SVC(C=1.0, kernel='poly', degree=3)
 
     # データ分割(テストデータ3割、残りは教師データ)
-    X_train, X_test, train_label, test_label = model_selection.train_test_split(X_std, z, test_size=0.05, random_state=0)
+    X_train, X_test, train_label, test_label = model_selection.train_test_split(X_std, z, test_size=0.1)
 
     # 学習用のデータと結果を学習する
     clf.result.fit(X_train, train_label)

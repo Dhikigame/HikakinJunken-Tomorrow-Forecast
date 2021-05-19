@@ -27,7 +27,7 @@ def data_parse_write2():
     cursor = con.cursor()
 
     # sql = 'select result, upload_date from hikakin_junken_data where result != "休み" order by upload_date asc'
-    sql = 'select result, upload_date from hikakin_junken_data where result != "休み" AND upload_date >= "2018-01-01" order by upload_date asc'
+    sql = 'select result, upload_date from hikakin_junken_data where result != "休み" AND upload_date >= "2014-11-03" order by upload_date asc'
     cursor.execute(sql)
     get_junkendata : list = cursor.fetchall()
 
