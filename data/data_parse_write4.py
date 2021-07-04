@@ -12,8 +12,7 @@ from info.information import Information
 
 def data_parse_write4():
     # Unicodeからutf-8へ変換
-    # sys.stdout = io.TextIOWrapper(sys.std
-    # out.buffer, encoding='utf-8')
+    # sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     # Mysqlに接続して取得したデータを挿入・更新する
     os_system = platform.system()
     if "Darwin" in os_system:

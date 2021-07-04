@@ -5,7 +5,6 @@ from mlxtend.plotting import plot_decision_regions
 import pandas as pd
 import csv
 import platform
-import calendar
 import os
 import MySQLdb
 from datetime import datetime
@@ -15,8 +14,7 @@ sys.path.append('..')
 from info.information import Information
 
 
-
-def junken_train_operation4():
+def junken_train_operation5():
     # Unicodeからutf-8へ変換
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
     os_system = platform.system()
@@ -27,12 +25,12 @@ def junken_train_operation4():
         # データ読み込み
         dr_junken_all = pd.read_csv(Information.csv_dir("Linux"), header=None)
     dr_junken = dr_junken_all[[0,1,2,3,4,5]]
-    dr_junken.columns = [u'result', u'month', u'nth_week', u'before_result_1', u'before_result_2', u'before_result_3']
+    dr_junken.columns = [u'result', u'day', u'day_sub', u'before_result_1', u'before_result_2', u'before_result_3']
     pd.DataFrame(dr_junken)
 
     # 説明変数
-    a = dr_junken["month"]
-    b = dr_junken["nth_week"]
+    a = dr_junken["day"]
+    b = dr_junken["day_sub"]
     c = dr_junken["before_result_1"]
     d = dr_junken["before_result_2"]
     e = dr_junken["before_result_3"]
@@ -40,7 +38,7 @@ def junken_train_operation4():
     z = dr_junken["result"]
 
     # SVMの中からLinearSVCを使用するための準備
-    X = dr_junken[['month', 'nth_week', 'before_result_1', 'before_result_2', 'before_result_3']]
+    X = dr_junken[['day', 'day_sub', 'before_result_1', 'before_result_2', 'before_result_3']]
     sc = preprocessing.StandardScaler()
     sc.fit(X)
     X_std = sc.transform(X)
@@ -50,14 +48,18 @@ def junken_train_operation4():
     clf.result = svm.SVC(C=1.0, kernel='poly', degree=3)
 
     # データ分割(テストデータ3割、残りは教師データ)
-    X_train, X_test, train_label, test_label = model_selection.train_test_split(X_std, z, test_size=0.3, random_state=0)
+    X_train, X_test, train_label, test_label = model_selection.train_test_split(X_std, z, test_size=0.1, random_state=0)
 
     # 学習用のデータと結果を学習する
     clf.result.fit(X_train, train_label)
 
+    win = 0
+    lose = 0
+    draw = 0
+    win_per = 0
     # 前回の日付を取得
-    before_month : int = a[len(z)-1]
-    nth_week : int = b[len(z)-1]
+    # before_month : int = a[len(z)-1]
+    before_day : int = a[len(z)-1]
     before_result_1 : int = z[len(z)-1]
     before_result_2 : int = c[len(z)-1]
     before_result_3 : int = d[len(z)-1]
@@ -66,28 +68,37 @@ def junken_train_operation4():
     now_year : int = dt_now.year
     now_month : int = dt_now.month
     now_day : int = dt_now.day
-    now_nth_week : int = get_nth_week(now_year, now_month, now_day)
-    print(dt_now)
-
-    predict_data = [[now_month, now_nth_week, before_result_1, before_result_2, before_result_3]]
+    now_day_sub : int = now_day - before_day
+    # before_year : int = before_year_calc(before_month, now_month, now_year)
+    # print("前回の年：" + str(before_year))
+    # print("前回の月：" + str(before_month))
+    # print("前回の日：" + str(before_day))
+    # print("前回の結果：" + str(before_result_1))
+    # print("前々回の結果：" + str(before_result_2))
+    # print()
+    # print("今日の年：" + str(now_year))
+    # print("今日の月：" + str(now_month))
+    # print("今日の日：" + str(now_day))
+    # print()
+    # day_sub = before_now_day_sub(before_year, before_month, before_day, now_year, now_month, now_day)
+    # print("今日と前回の日付差分：" + str(day_sub))
+    # print()
+    predict_data = [[now_day, now_day_sub, before_result_1, before_result_2, before_result_3]]
     hikakin_result_pre = clf.result.predict(predict_data)
     result_predict = hikakin_result_pre[0]
+    # print("今日のじゃんけん予測：" + str(result_predict))
 
-    # win = 0
-    # lose = 0
-    # draw = 0
-    # win_per = 0 
-    # for junkencount in range(150, len(z)):
+    # for junkencount in range(0, len(z)):
     #     month = a[junkencount]
-    #     nth_week = b[junkencount]
-    #     before_result_1 = c[junkencount]
-    #     before_result_2 = d[junkencount]
-    #     before_result_3 = e[junkencount]
+    #     day = b[junkencount]
+    #     day_sub = c[junkencount]
+    #     before_result_1 = d[junkencount]
+    #     before_result_2 = e[junkencount]
     #     hikakin_result = z[junkencount]
 
-    #     test_data = [[month, nth_week, before_result_1, before_result_2, before_result_3]]
+    #     test_data = [[month, day, day_sub, before_result_1, before_result_2]]
     #     hikakin_result_pre = clf.result.predict(test_data)
-    #     winning_losing_result = junken_result_nthweek(month, nth_week, hikakin_result, test_data, hikakin_result_pre)
+    #     winning_losing_result = junken_result(month, day, hikakin_result, test_data, hikakin_result_pre)
 
     #     if winning_losing_result == "勝ち":
     #         win = win + 1
@@ -103,6 +114,7 @@ def junken_train_operation4():
     #     print("勝率：" + str(win_per))
 
 
+
     # 正答率を求める
     # pre = clf.result.predict(X_test)
     # ac_score = metrics.accuracy_score(test_label, pre)
@@ -110,7 +122,6 @@ def junken_train_operation4():
     # scores = model_selection.cross_val_score(clf.result, X_std, z, cv=10)
     # print("平均正解率 = ", scores.mean())
     # print("正解率の標準偏差 = ", scores.std())
-
 
     # Mysqlに機械学習で得られた予測結果をを挿入・更新する
     os_system = platform.system()
@@ -134,14 +145,6 @@ def junken_train_operation4():
     cursor.close()
     con.close()
 
-
-
-# 年月日が月の第何週か求める
-def get_nth_week(year, month, day, firstweekday=6):
-    # calendar.monthrange:指定された月の一日の曜日と日数を返す
-    first_dow = calendar.monthrange(int(year), int(month))[0]
-    offset = (first_dow - int(firstweekday)) % 7
-    return (int(day) + offset - 1) // 7 + 1
 
 def before_year_calc(before_month, now_month, now_year):
     if now_month == 1 and before_month == 12:
